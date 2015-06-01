@@ -172,14 +172,25 @@ module Adyen
 
       def card_partial
         if @params[:card] && @params[:card][:encrypted] && @params[:card][:encrypted][:json]
-          ENCRYPTED_CARD_PARTIAL % [@params[:card][:encrypted][:json]]
+          encrypted = ENCRYPTED_CARD_PARTIAL % [@params[:card][:encrypted][:json]]
+          if @params[:card][:billing_address]
+            address = @params[:card][:billing_address].values_at(:city, :street, :house_number_or_name, :postal_code, :state_or_province, :country)
+            encrypted << ENCRYPTED_ADDRESS_CARD_PARTIAL % address
+          end
+          encrypted
         else
           validate_parameters!(:card => [:holder_name, :number, :expiry_year, :expiry_month])
           card  = @params[:card].values_at(:holder_name, :number, :expiry_year)
           card << @params[:card][:expiry_month].to_i
           card << (['', nil].include?(@params[:card][:cvc]) ? '' : (CARD_CVC_PARTIAL % @params[:card][:cvc]))
+          card << (@params[:card][:billing_address] ? card_billing_address : '')
           CARD_PARTIAL % card
         end
+      end
+
+      def card_billing_address
+        address = @params[:card][:billing_address].values_at(:city, :street, :house_number_or_name, :postal_code, :state_or_province, :country)
+        CARD_ADDRESS_PARTIAL % address
       end
 
       def installments_partial

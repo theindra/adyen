@@ -62,12 +62,25 @@ module Adyen
           <payment:expiryYear>%s</payment:expiryYear>
           <payment:expiryMonth>%02d</payment:expiryMonth>
           %s
+          %s
         </payment:card>
       EOXML
 
       # @private
       CARD_CVC_PARTIAL = <<-EOXML
         <payment:cvc>%s</payment:cvc>
+      EOXML
+
+      # @private
+      CARD_ADDRESS_PARTIAL = <<-EOXML
+        <payment:billingAddress>
+          <common:city>%s</common:city>
+          <common:street>%s</common:street>
+          <common:houseNumberOrName>%s</common:houseNumberOrName>
+          <common:postalCode>%s</common:postalCode>
+          <common:stateOrProvince>%s</common:stateOrProvince>
+          <common:country>%s</common:country>
+        </payment:billingAddress>
       EOXML
 
       # @private
@@ -108,13 +121,20 @@ module Adyen
 
       # @private
       ENCRYPTED_CARD_PARTIAL = <<-EOXML
-        <additionalAmount xmlns="http://payment.services.adyen.com" xsi:nil="true" />
-        <additionalData xmlns="http://payment.services.adyen.com">
-          <entry>
-            <key xsi:type="xsd:string">card.encrypted.json</key>
-            <value xsi:type="xsd:string">%s</value>
-          </entry>
-        </additionalData>
+        <payment:additionalAmount xmlns="http://payment.services.adyen.com" xsi:nil="true" />
+        <payment:additionalData xmlns="http://payment.services.adyen.com">
+          <payment:entry>
+            <payment:key xsi:type="xsd:string">card.encrypted.json</payment:key>
+            <payment:value xsi:type="xsd:string">%s</payment:value>
+          </payment:entry>
+        </payment:additionalData>
+      EOXML
+
+      # @private
+      ENCRYPTED_ADDRESS_CARD_PARTIAL = <<-EOXML
+        <payment:card>
+          #{CARD_ADDRESS_PARTIAL}
+        </payment:card>
       EOXML
 
       # @private

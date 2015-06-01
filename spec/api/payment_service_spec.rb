@@ -101,6 +101,14 @@ describe Adyen::API::PaymentService do
         :holder_name => 'Simon わくわく Hopper',
         :number => '4444333322221111',
         :cvc => '737',
+        :billing_address => {
+          :city => 'Berlin',
+          :street => 'Flughafen Tegel',
+          :house_number_or_name => '',
+          :postal_code => 13405,
+          :state_or_province => 'BE',
+          :country => 'DE'
+        }
         # Maestro UK/Solo only
         #:issue_number => ,
         #:start_month => ,
@@ -147,6 +155,54 @@ describe Adyen::API::PaymentService do
         card.text('./payment:cvc').should == '737'
         card.text('./payment:expiryMonth').should == '12'
         card.text('./payment:expiryYear').should == '2012'
+      end
+    end
+
+    it "includes the address details" do
+      xpath('./payment:card/payment:billingAddress') do |card|
+        card.text('./common:city').should == 'Berlin'
+        card.text('./common:street').should == 'Flughafen Tegel'
+        card.text('./common:houseNumberOrName').should == ''
+        card.text('./common:postalCode').should == '13405'
+        card.text('./common:stateOrProvince').should == 'BE'
+        card.text('./common:country').should == 'DE'
+      end
+    end
+
+    context "with encrypted details" do
+      before do
+        @payment.params[:card] = {
+          :encrypted => {
+            :json => "abc123"
+          },
+          :billing_address => {
+            :city => 'Berlin',
+            :street => 'Flughafen Tegel',
+            :house_number_or_name => '',
+            :postal_code => 13405,
+            :state_or_province => 'BE',
+            :country => 'DE'
+          }
+        }
+      end
+
+      it "includes the creditcard details" do
+        text('./payment:additionalAmount').should == ''
+        xpath('./payment:additionalData/payment:entry') do |entry|
+          entry.text('./payment:key').should == 'card.encrypted.json'
+          entry.text('./payment:value').should == 'abc123'
+        end
+      end
+
+      it "includes the address details" do
+        xpath('./payment:card/payment:billingAddress') do |card|
+          card.text('./common:city').should == 'Berlin'
+          card.text('./common:street').should == 'Flughafen Tegel'
+          card.text('./common:houseNumberOrName').should == ''
+          card.text('./common:postalCode').should == '13405'
+          card.text('./common:stateOrProvince').should == 'BE'
+          card.text('./common:country').should == 'DE'
+        end
       end
     end
 
@@ -502,4 +558,3 @@ describe Adyen::API::PaymentService do
     node_for_current_object_and_method.xpath('//payment:authorise/payment:paymentRequest')
   end
 end
-
