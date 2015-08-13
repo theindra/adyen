@@ -421,5 +421,51 @@ module Adyen
           payment_method => params
         }).store_token
     end
+
+    # Schedules an Account Updater request. Be aware that you will need to have signed a contract with
+    # Adyen before this is enabled. Contact your account representative. Adyen will respond via a
+    # backend notification with eventCode=ACCOUNT_UPDATER_RESULT within the next 7 days after an Account
+    # Updater request is scheduled successfully.
+    #
+    # When making the API call, merchants can submit either the credit card information,
+    # or the recurring detail reference and the shopper reference.
+    #
+    # If the card information is provided, all the sub-fields for card are mandatory. See example below:
+    #
+    # # @example
+    #   response = Adyen::API.schedule_account_updater(
+    #     { :expiry_month => 12, :expiry_year => 2012, :holder_name => 'Adyen Test', :number => '4444333322221111' }
+    #   )
+    #
+    # If the recurring detail reference is provided, the fields for shopper_reference and selected_recurring_detail_reference
+    # are mandatory.
+    #
+    # # @example
+    #   response = Adyen::API.schedule_account_updater(
+    #     { :shopper_reference => user.id , :selected_recurring_detail_reference => '1234567890987654321' }
+    #   )
+    #
+    # @param      [Hash]        params              The hash describing the [credit card] or
+    #                                               [shopper reference & selected recurring detail reference combo].
+    # ##### Credit card specific options:
+    #
+    # @option params    [Numeric,String] :expiry_month         The month in which the card expires.
+    # @option params    [Numeric,String] :expiry_year          The year in which the card expires.
+    # @option params    [String]         :holder_name          The full name on the card or of the card holder.
+    # @option params    [String]         :number               The card or account number.
+    #
+    # ##### Token specific options:
+    #
+    # @option params    [Numeric,String] :shopper_reference                     The shopper’s reference (ID).
+    # @option params    [Numeric,String] :selected_recurring_detail_reference   The ID of a specific recurring contract.
+    #
+    # @return [RecurringService::ScheduleAccountUpdaterResponse] The response object
+    def schedule_account_updater(reference, params)
+      request_method = params.include?(:selected_recurring_detail_reference) ? :token : :card
+      RecurringService.new({
+        :reference => reference,
+        request_method => params
+      }).schedule_account_updater
+    end
   end
 end

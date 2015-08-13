@@ -220,17 +220,60 @@ describe Adyen::API::RecurringService do
     end
   end
 
-  describe_response_from :disable, (DISABLE_RESPONSE % '[detail-successfully-disabled]'), 'disable' do
-    it "returns whether or not it was disabled" do
-      @response.should be_success
-      @response.should be_disabled
-
-      stub_net_http(DISABLE_RESPONSE % '[all-details-successfully-disabled]')
-      @response = @recurring.disable
-      @response.should be_success
-      @response.should be_disabled
+  describe_request_body_of :schedule_account_updater, '//recurring:scheduleAccountUpdater/recurring:request' do
+    before do
+      @recurring.params[:token] = {
+        :shopper_reference => 1234,
+        :selected_recurring_detail_reference => 'RecurringDetailReference1'
+      }
     end
 
-    it_should_return_params_for_each_xml_backend(:response => '[detail-successfully-disabled]')
+    it_should_validate_request_parameters :merchant_account
+    it_should_validate_request_parameters :reference
+
+    it "includes the merchant account handle" do
+      text('./recurring:merchantAccount').should == 'SuperShopper'
+    end
+
+    it "includes the reference number" do
+      text('./recurring:reference').should == 'order-id'
+    end
+
+    it "includes the shopper’s reference" do
+      text('./recurring:shopperReference').should == '1234'
+    end
+
+    it "includes the shopper's selected recurring detail reference if given" do
+      text('./recurring:selectedRecurringDetailReference').should == 'RecurringDetailReference1'
+    end
+  end
+
+  describe_request_body_of :schedule_account_updater, '//recurring:scheduleAccountUpdater/recurring:request' do
+    it_should_validate_request_parameters :merchant_account
+    it_should_validate_request_parameters :reference
+
+    it "includes the merchant account handle" do
+      text('./recurring:merchantAccount').should == 'SuperShopper'
+    end
+
+    it "includes the reference number" do
+      text('./recurring:reference').should == 'order-id'
+    end
+
+    it "includes the creditcard details" do
+      xpath('./recurring:card') do |card|
+        # there's no reason why Nokogiri should escape these characters, but as long as they're correct
+        card.text('./payment:holderName').should == 'Simon わくわく Hopper'
+        card.text('./payment:number').should == '4444333322221111'
+        card.text('./payment:expiryMonth').should == '12'
+        card.text('./payment:expiryYear').should == '2012'
+      end
+    end
+  end
+
+  describe_response_from :schedule_account_updater, SCHEDULE_ACCOUNT_UPDATER_RESPONSE, 'scheduleAccountUpdater' do
+    it "returns whether or not it was successful" do
+      @response.should be_success
+    end
   end
 end

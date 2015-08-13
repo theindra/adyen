@@ -226,6 +226,22 @@ describe Adyen::API do
         should_map_shortcut_to(:disable, :shopper => { :reference => 'user-id' }, :recurring_detail_reference => 'detail-id')
         Adyen::API.disable_recurring_contract('user-id', 'detail-id')
       end
+
+      it "performs a `schedule_account_updater` request with token data" do
+        should_map_shortcut_to(:schedule_account_updater,
+          :reference => 'order-id',
+          :token => { :shopper_reference => 'user-id' , :selected_recurring_detail_reference => '1234567890987654321' }
+        )
+        Adyen::API.schedule_account_updater('order-id', { :shopper_reference => 'user-id' , :selected_recurring_detail_reference => '1234567890987654321' })
+      end
+
+      it "performs a `schedule_account_updater` request with credit card data" do
+        should_map_shortcut_to(:schedule_account_updater,
+          :reference => 'order-id',
+          :card => { :expiry_month => 12, :expiry_year => 2012, :holder_name => 'Adyen Test', :number => '4444333322221111' }
+        )
+        Adyen::API.schedule_account_updater('order-id', { :expiry_month => 12, :expiry_year => 2012, :holder_name => 'Adyen Test', :number => '4444333322221111' })
+      end
     end
   end
 end

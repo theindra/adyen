@@ -66,6 +66,22 @@ EOS
         </recurring:elv>
 EOS
 
+      SCHEDULE_ACCOUNT_UPDATER_LAYOUT = <<EOS
+        <recurring:scheduleAccountUpdater xmlns:recurring="http://recurring.services.adyen.com" xmlns:payment="http://payment.services.adyen.com">
+          <recurring:request>
+            <recurring:merchantAccount>%s</recurring:merchantAccount>
+            <recurring:reference>%s</recurring:reference>
+            %s
+          </recurring:request>
+        </recurring:scheduleAccountUpdater>
+EOS
+
+      # @private
+      TOKEN_PARTIAL = <<EOS
+        <recurring:shopperReference>%s</recurring:shopperReference>
+        <recurring:selectedRecurringDetailReference>%s</recurring:selectedRecurringDetailReference>
+EOS
+
     end
   end
 end

@@ -36,6 +36,11 @@ module Adyen
         call_webservice_action('storeToken', store_token_request_body, StoreTokenResponse)
       end
 
+      # @see API.schedule_account_updater
+      def schedule_account_updater
+        call_webservice_action('scheduleAccountUpdater', schedule_account_updater_request_body, ScheduleAccountUpdaterResponse)
+      end
+
       private
 
       # The card's CVC isn't needed when tokenising details, so insert `nil'.
@@ -52,6 +57,12 @@ module Adyen
         validate_parameters!(:elv => ELV_ATTRS)
         elv  = @params[:elv].values_at(*ELV_ATTRS)
         ELV_PARTIAL % elv
+      end
+
+      def token_partial
+        validate_parameters!(:token => [:shopper_reference, :selected_recurring_detail_reference])
+        token_params  = @params[:token].values_at(*[:shopper_reference, :selected_recurring_detail_reference])
+        TOKEN_PARTIAL % token_params
       end
 
       def list_request_body
@@ -71,9 +82,17 @@ module Adyen
         validate_parameters!(:merchant_account, :shopper => [:email, :reference])
         content = []
         content << card_partial unless @params[:card].nil?
-        content << elv_partial  unless @params[:elv].nil?    
-        raise ArgumentError, "The required parameter 'card' or 'elv' is missing." if content.empty?    
+        content << elv_partial  unless @params[:elv].nil?
+        raise ArgumentError, "The required parameter 'card' or 'elv' is missing." if content.empty?
         STORE_TOKEN_LAYOUT % [@params[:merchant_account], @params[:shopper][:reference], @params[:shopper][:email], content.join]
+      end
+
+      def schedule_account_updater_request_body
+        validate_parameters!(:merchant_account, :reference)
+        content = []
+        content << card_partial unless @params[:card].nil?
+        content << token_partial unless @params[:token].nil?
+        SCHEDULE_ACCOUNT_UPDATER_LAYOUT % [@params[:merchant_account], @params[:reference], content.join]
       end
 
       class DisableResponse < Response
@@ -185,6 +204,18 @@ module Adyen
             :reference =>  xml_querier.text('//recurring:storeTokenResponse/recurring:result/recurring:rechargeReference'),
             :recurring_detail_reference => xml_querier.text('//recurring:storeTokenResponse/recurring:result/recurring:recurringDetailReference')
           }
+        end
+      end
+
+      class ScheduleAccountUpdaterResponse < Response
+        response_attrs :response
+
+        def success?
+          super && params[:response] == 'Success'
+        end
+
+        def params
+          @params ||= { :response => xml_querier.text('//recurring:scheduleAccountUpdaterResponse/recurring:result/recurring:result') }
         end
       end
     end
