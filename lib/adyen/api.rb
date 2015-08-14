@@ -434,6 +434,7 @@ module Adyen
     #
     # # @example
     #   response = Adyen::API.schedule_account_updater(
+    #     order.id,
     #     { :expiry_month => 12, :expiry_year => 2012, :holder_name => 'Adyen Test', :number => '4444333322221111' }
     #   )
     #
@@ -442,11 +443,13 @@ module Adyen
     #
     # # @example
     #   response = Adyen::API.schedule_account_updater(
+    #     order.id,
     #     { :shopper_reference => user.id , :selected_recurring_detail_reference => '1234567890987654321' }
     #   )
     #
-    # @param      [Hash]        params              The hash describing the [credit card] or
-    #                                               [shopper reference & selected recurring detail reference combo].
+    # @param      [Numeric,String] reference           Your reference (ID) for this payment.
+    # @param      [Hash]           params              The hash describing the [credit card] or
+    #                                                  [shopper reference & selected recurring detail reference combo].
     # ##### Credit card specific options:
     #
     # @option params    [Numeric,String] :expiry_month         The month in which the card expires.
