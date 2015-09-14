@@ -72,7 +72,15 @@ describe Adyen::API::RecurringService do
           },
           :recurring_detail_reference => 'RecurringDetailReference1',
           :variant => 'mc',
-          :creation_date => DateTime.parse('2009-10-27T11:50:12.178+01:00')
+          :creation_date => DateTime.parse('2009-10-27T11:50:12.178+01:00'),
+          :additional_data => {
+            'newAlias' => '555543',
+            'newCardBin' => '555543',
+            'newExpiryMonth' => '9',
+            'newExpiryYear' => '2016',
+            'lastAccountUpdaterCheck' => DateTime.parse('2014-03-22 10:01:11.883+01'),
+            'newCardSummary' => '1234'
+          }
         },
         {
           :bank => {
@@ -105,6 +113,14 @@ describe Adyen::API::RecurringService do
 
     it "returns an array with just the detail references" do
       @response.references.should == %w{ RecurringDetailReference1 RecurringDetailReference2 RecurringDetailReference3 }
+    end
+
+    it "returns an array of hashes mapping recurring_detail_reference to additional_data" do
+      @response.additional_data.should == [
+        { "RecurringDetailReference1" => { "newAlias" => "555543", "newCardBin" => "555543", "newExpiryMonth" => "9", "newExpiryYear" => "2016", "lastAccountUpdaterCheck" => DateTime.parse('2014-03-22 10:01:11.883+01'), "newCardSummary" => "1234" } },
+        { "RecurringDetailReference2" => nil },
+        { "RecurringDetailReference3" => nil }
+      ]
     end
   end
 
@@ -187,7 +203,7 @@ describe Adyen::API::RecurringService do
       text('./recurring:recurring/payment:contract').should == 'RECURRING'
     end
   end
-  
+
   describe_request_body_of :store_token, '//recurring:storeToken/recurring:request' do
     it_should_validate_request_parameters :merchant_account,
                                           :shopper => [:email, :reference]
@@ -206,7 +222,7 @@ describe Adyen::API::RecurringService do
 
     it "includes the ELV details" do
       xpath('./recurring:elv') do |elv|
-        # there's no reason why Nokogiri should escape these characters, but as long as they're correct        
+        # there's no reason why Nokogiri should escape these characters, but as long as they're correct
         elv.text('./payment:accountHolderName').should == 'Simon わくわく Hopper'
         elv.text('./payment:bankAccountNumber').should == '1234567890'
         elv.text('./payment:bankLocation').should == 'Berlin'

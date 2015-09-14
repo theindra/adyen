@@ -118,6 +118,10 @@ module Adyen
           details ? details.map { |d| d[:recurring_detail_reference] } : []
         end
 
+        def additional_data
+          details ? details.map { |d| {}.tap { |h| h[d[:recurring_detail_reference]] = d[:additional_data] } } : []
+        end
+
         def params
           @params ||= xml_querier.xpath('//recurring:listRecurringDetailsResponse/recurring:result') do |result|
             details = result.xpath('.//recurring:RecurringDetail')
@@ -139,10 +143,13 @@ module Adyen
             :creation_date              => DateTime.parse(node.text('./recurring:creationDate'))
           }
 
+          additional_data = node.xpath('./recurring:additionalData/recurring:entry')
+          result[:additional_data] = additional_data.map { |n| parse_additional_data(n) }.reduce(:merge) unless additional_data.empty?
+
           card = node.xpath('./recurring:card')
-          elv  = node.xpath('./recurring:elv')  
-          bank = node.xpath('./recurring:bank')        
-          
+          elv  = node.xpath('./recurring:elv')
+          bank = node.xpath('./recurring:bank')
+
           if !card.children.empty?
             result[:card] = parse_card_details(card)
           elsif !elv.children.empty?
@@ -150,8 +157,20 @@ module Adyen
           else
             result[:bank] = parse_bank_details(bank)
           end
-          
+
           result
+        end
+
+        def parse_additional_data(node)
+          {}.tap do |hash|
+            key = node.text('./recurring:key')
+            if key == 'lastAccountUpdaterCheck'
+              value = DateTime.parse(node.text('./recurring:value'))
+            else
+              value = node.text('./recurring:value')
+            end
+            hash[key] = value unless key.empty?
+          end
         end
 
         def parse_card_details(card)

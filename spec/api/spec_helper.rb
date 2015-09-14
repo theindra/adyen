@@ -302,6 +302,34 @@ LIST_RESPONSE = <<EOS
         <ns1:creationDate>2009-10-27T11:26:22.203+01:00</ns1:creationDate>
         <details xmlns="http://recurring.services.adyen.com">
           <RecurringDetail>
+            <additionalData>
+              <entry>
+                <key xsi:type="xsd:string">newAlias</key>
+                <value xsi:type="xsd:string">555543</value>
+              </entry>
+              <entry>
+                <key xsi:type="xsd:string">newCardBin</key>
+                <value xsi:type="xsd:string">555543</value>
+              </entry>
+              <entry>
+                <key xsi:type="xsd:string">newExpiryMonth</key>
+                <value xsi:type="xsd:string">9</value>
+              </entry>
+              <entry>
+                <key xsi:type="xsd:string">newExpiryYear</key>
+                <value xsi:type="xsd:string">2016</value>
+              </entry>
+              <entry>
+                <key xsi:type="xsd:string">lastAccountUpdaterCheck</key>
+                <value xsi:type="xsd:string">2014-03-22 10:01:11.883+01</value>
+              </entry>
+               <entry>
+                <key xsi:type="xsd:string">newCardSummary</key>
+                <value xsi:type="xsd:string">1234</value>
+              </entry>
+            </additionalData>
+            <alias>M104640077590143</alias>
+            <aliasType>Default</aliasType>
             <bank xsi:nil="true"/>
             <card>
               <cvc xmlns="http://payment.services.adyen.com" xsi:nil="true"/>
@@ -338,7 +366,7 @@ LIST_RESPONSE = <<EOS
           </RecurringDetail>
           <RecurringDetail>
             <card xsi:nil="true"/>
-            <bank xsi:nil="true"/>            
+            <bank xsi:nil="true"/>
             <elv>
               <accountHolderName xmlns="http://payment.services.adyen.com">S. Hopper</accountHolderName>
               <bankAccountNumber xmlns="http://payment.services.adyen.com">1234567890</bankAccountNumber>
