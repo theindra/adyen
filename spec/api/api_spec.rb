@@ -77,6 +77,7 @@ describe Adyen::API do
           :reference => 'order-id',
           :amount => { :currency => 'EUR', :value => 1234 },
           :shopper => { :reference => 'user-id', :email => 's.hopper@example.com' },
+          :card => nil,
           :recurring_detail_reference => 'LATEST',
           :instant_capture => false,
           :fraud_offset => nil
@@ -92,6 +93,7 @@ describe Adyen::API do
           :reference => 'order-id',
           :amount => { :currency => 'EUR', :value => 1234 },
           :shopper => { :reference => 'user-id', :email => 's.hopper@example.com' },
+          :card => nil,
           :recurring_detail_reference => 'recurring-detail-reference',
           :instant_capture => false,
           :fraud_offset => nil
@@ -103,11 +105,32 @@ describe Adyen::API do
         )
       end
 
+      it "performs a `authorise recurring payment' request with specific detail and card data" do
+        should_map_shortcut_to(:authorise_recurring_payment,
+          :reference => 'order-id',
+          :amount => { :currency => 'EUR', :value => 1234 },
+          :shopper => { :reference => 'user-id', :email => 's.hopper@example.com' },
+          :card => { :expiry_month => 12, :expiry_year => 2012, :holder_name => "Simon Hopper", :number => '4444333322221111' },
+          :recurring_detail_reference => 'recurring-detail-reference',
+          :instant_capture => false,
+          :fraud_offset => nil,
+        )
+        Adyen::API.authorise_recurring_payment('order-id',
+          { :currency => 'EUR', :value => 1234 },
+          { :reference => 'user-id', :email => 's.hopper@example.com' },
+          'recurring-detail-reference',
+          nil,
+          false,
+          { :expiry_month => 12, :expiry_year => 2012, :holder_name => "Simon Hopper", :number => '4444333322221111' }
+        )
+      end
+
       it "performs a `authorise recurring payment' request with specific detail and fraud offset" do
         should_map_shortcut_to(:authorise_recurring_payment,
           :reference => 'order-id',
           :amount => { :currency => 'EUR', :value => 1234 },
           :shopper => { :reference => 'user-id', :email => 's.hopper@example.com' },
+          :card => nil,
           :recurring_detail_reference => 'recurring-detail-reference',
           :fraud_offset => 50,
           :instant_capture => false

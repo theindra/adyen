@@ -183,6 +183,7 @@ module Adyen
     # @param          [Numeric,String] reference      Your reference (ID) for this payment.
     # @param          [Hash]           amount         A hash describing the money to charge.
     # @param          [Hash]           shopper        A hash describing the shopper.
+    # @param          [Hash]           card           A hash describing the credit card details.
     #
     # @option amount  [String]         :currency      The ISO currency code (EUR, GBP, USD, etc).
     # @option amount  [Integer]        :value         The value of the payment in discrete cents,
@@ -201,10 +202,11 @@ module Adyen
     #
     # @return [PaymentService::AuthorisationResponse] The response object which holds the
     #                                                 authorisation status.
-    def authorise_recurring_payment(reference, amount, shopper, recurring_detail_reference = 'LATEST', fraud_offset = nil, instant_capture = false)
+    def authorise_recurring_payment(reference, amount, shopper, recurring_detail_reference = 'LATEST', fraud_offset = nil, instant_capture = false, card = nil)
       params = { :reference => reference,
                  :amount    => amount,
                  :shopper   => shopper,
+                 :card      => card,
                  :recurring_detail_reference => recurring_detail_reference,
                  :fraud_offset => fraud_offset,
                  :instant_capture => instant_capture }

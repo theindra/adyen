@@ -364,8 +364,13 @@ describe Adyen::API::PaymentService do
       text('./payment:shopperInteraction').should == 'ContAuth'
     end
 
-    it "does not include any creditcard details" do
+    it "when no card data is present, does not include any creditcard details" do
+      @payment.params[:card] = nil
       xpath('./payment:card').should be_empty
+    end
+
+    it "when card data is present, includes creditcard details" do
+      text('./payment:card/payment:expiryMonth').should == '12'
     end
   end
 
