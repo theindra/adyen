@@ -19,7 +19,7 @@ module Adyen
     #
     class RecurringService < SimpleSOAPClient
       # The Adyen Recurring SOAP service endpoint uri.
-      ENDPOINT_URI = 'https://pal-%s.adyen.com/pal/servlet/soap/Recurring'
+      ENDPOINT_URI = 'https://pal-%s.adyen.com/pal/servlet/soap/Recurring/v12'
 
       # @see API.list_recurring_details
       def list
