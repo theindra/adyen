@@ -180,7 +180,7 @@ module Adyen
           end
           encrypted
         else
-          validate_parameters!(:card => [:holder_name, :number, :expiry_year, :expiry_month])
+          validate_parameters!(:card => [:expiry_year, :expiry_month])
           card  = @params[:card].values_at(:holder_name, :number, :expiry_year)
           card << @params[:card][:expiry_month].to_i
           card << (['', nil].include?(@params[:card][:cvc]) ? '' : (CARD_CVC_PARTIAL % @params[:card][:cvc]))
