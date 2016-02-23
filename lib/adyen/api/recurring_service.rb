@@ -20,6 +20,7 @@ module Adyen
     class RecurringService < SimpleSOAPClient
       # The Adyen Recurring SOAP service endpoint uri.
       ENDPOINT_URI = 'https://pal-%s.adyen.com/pal/servlet/soap/Recurring'
+      ACCOUNT_UPDATER_ENDPOINT_URI = 'https://pal-%s.adyen.com/pal/servlet/Recurring/v12'
 
       # @see API.list_recurring_details
       def list
@@ -38,7 +39,8 @@ module Adyen
 
       # @see API.schedule_account_updater
       def schedule_account_updater
-        call_webservice_action('scheduleAccountUpdater', schedule_account_updater_request_body, ScheduleAccountUpdaterResponse)
+        custom_endpoint = URI.parse(ACCOUNT_UPDATER_ENDPOINT_URI % Adyen.configuration.environment)
+        call_webservice_action('scheduleAccountUpdater', schedule_account_updater_request_body, ScheduleAccountUpdaterResponse, custom_endpoint)
       end
 
       private

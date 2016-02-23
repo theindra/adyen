@@ -104,12 +104,16 @@ module Adyen
       # @param [String]   action         The remote action to call.
       # @param [String]   data           The XML data to post to the remote action.
       # @param [Response] response_class The Response subclass used to wrap the response from Adyen.
-      def call_webservice_action(action, data, response_class)
+      def call_webservice_action(action, data, response_class, custom_endpoint = nil)
         if response = self.class.stubbed_response
           self.class.stubbed_response = nil
           response
         else
-          endpoint = self.class.endpoint
+          if custom_endpoint
+            endpoint = custom_endpoint
+          else
+            endpoint = self.class.endpoint
+          end
 
           post = Net::HTTP::Post.new(endpoint.path, 'Accept' => 'text/xml', 'Content-Type' => 'text/xml; charset=utf-8', 'SOAPAction' => action)
           post.basic_auth(Adyen.configuration.api_username, Adyen.configuration.api_password)
