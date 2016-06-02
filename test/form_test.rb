@@ -14,12 +14,12 @@ class FormTest < Minitest::Test
     Adyen.configuration.payment_flow = :select
     Adyen.configuration.payment_flow_domain = nil
 
-    @payment_attributes = { 
-      :skin => :testing, 
-      :currency_code => 'GBP', 
+    @payment_attributes = {
+      :skin => :testing,
+      :currency_code => 'GBP',
       :payment_amount => 10000,
       :merchant_reference => 'Internet Order 12345',
-      :ship_before_date => '2007-10-20', 
+      :ship_before_date => '2007-10-20',
       :session_validity => '2007-10-11T11:00:00Z',
       :billing_address => {
         :street               => 'Alexanderplatz',
@@ -39,8 +39,8 @@ class FormTest < Minitest::Test
 
     @recurring_payment_attributes = @payment_attributes.merge(
       :skin               => :other,
-      :recurring_contract => 'DEFAULT', 
-      :shopper_reference  => 'grasshopper52', 
+      :recurring_contract => 'DEFAULT',
+      :shopper_reference  => 'grasshopper52',
       :shopper_email      => 'gras.shopper@somewhere.org'
     )
 
@@ -80,9 +80,9 @@ class FormTest < Minitest::Test
   end
 
   def test_redirect_url_generation
-    attributes = { 
+    attributes = {
       :currency_code => 'GBP', :payment_amount => 10000, :ship_before_date => Date.today,
-      :merchant_reference => 'Internet Order 12345', :skin => :testing, :session_validity => Time.now + 3600 
+      :merchant_reference => 'Internet Order 12345', :skin => :testing, :session_validity => Time.now + 3600
     }
 
     redirect_uri = URI(Adyen::Form.redirect_url(attributes))
@@ -97,9 +97,9 @@ class FormTest < Minitest::Test
   end
 
   def test_payment_methods_url_generation
-    attributes = { 
+    attributes = {
       :currency_code => 'GBP', :payment_amount => 10000, :ship_before_date => Date.today,
-      :merchant_reference => 'Internet Order 12345', :skin => :testing, :session_validity => Time.now + 3600 
+      :merchant_reference => 'Internet Order 12345', :skin => :testing, :session_validity => Time.now + 3600
     }
 
     redirect_uri = URI(Adyen::Form.payment_methods_url(attributes))
@@ -111,7 +111,7 @@ class FormTest < Minitest::Test
     end
 
     assert params.key?('merchantSig'), "Expected a merchantSig parameter to be set"
-  end  
+  end
 
   def test_redirect_signature_string
     signature_string = Adyen::Form.calculate_signature_string(@payment_attributes)
@@ -125,8 +125,8 @@ class FormTest < Minitest::Test
   end
 
   def test_redirect_signature
-    assert_equal 'x58ZcRVL1H6y+XSeBGrySJ9ACVo=', Adyen::Form.calculate_signature(@payment_attributes)
-    assert_equal 'EZtZS/33I6qsXptTfRIFMJxeKFE=', Adyen::Form.calculate_signature(@recurring_payment_attributes)
+    assert_equal 'yd1MK09ojbqazgNO6JxYX2zg2zN8V/uFgYCv/YztLbE=', Adyen::Form.calculate_signature(@payment_attributes)
+    assert_equal 'lGEvU9uvmn3XVwCvmVJ6zSg+U9zu6tqqfqA5GSQht3Y=', Adyen::Form.calculate_signature(@recurring_payment_attributes)
 
     @payment_attributes.delete(:shared_secret)
     assert_raises(ArgumentError) { Adyen::Form.calculate_signature(@payment_attributes) }
@@ -135,39 +135,39 @@ class FormTest < Minitest::Test
   def test_shopper_signature
     signature_string = Adyen::Form.calculate_shopper_signature_string(@payment_attributes[:shopper])
     assert_equal "JohnDoe1234512345", signature_string
-    assert_equal 'rb2GEs1kGKuLh255a3QRPBYXmsQ=', Adyen::Form.calculate_shopper_signature(@payment_attributes)
+    assert_equal 'ZVwIQr0pQ7hC9a7gXPlpCCVXF2xEevH9Fd41TEFisi0=', Adyen::Form.calculate_shopper_signature(@payment_attributes)
 
     @payment_attributes.delete(:shared_secret)
-    assert_raises(ArgumentError) { Adyen::Form.calculate_shopper_signature(@payment_attributes) } 
+    assert_raises(ArgumentError) { Adyen::Form.calculate_shopper_signature(@payment_attributes) }
   end
 
   def test_billing_address_signature
     signature_string = Adyen::Form.calculate_billing_address_signature_string(@payment_attributes[:billing_address])
     assert_equal "Alexanderplatz0815Berlin10119BerlinGermany", signature_string
-    assert_equal '5KQb7VJq4cz75cqp11JDajntCY4=', Adyen::Form.calculate_billing_address_signature(@payment_attributes)
+    assert_equal 'NBJGO3SUMM1jh3YLYyzXGVsunOFIcT85G0ykmKPHhDQ=', Adyen::Form.calculate_billing_address_signature(@payment_attributes)
 
     @payment_attributes.delete(:shared_secret)
-    assert_raises(ArgumentError) { Adyen::Form.calculate_billing_address_signature(@payment_attributes) } 
+    assert_raises(ArgumentError) { Adyen::Form.calculate_billing_address_signature(@payment_attributes) }
   end
 
   def test_billing_address_and_shopper_signature_in_redirect_url
     get_params = CGI.parse(URI(Adyen::Form.redirect_url(@payment_attributes)).query)
-    assert_equal '5KQb7VJq4cz75cqp11JDajntCY4=', get_params['billingAddressSig'].first
-    assert_equal 'rb2GEs1kGKuLh255a3QRPBYXmsQ=', get_params['shopperSig'].first
-  end  
+    assert_equal 'NBJGO3SUMM1jh3YLYyzXGVsunOFIcT85G0ykmKPHhDQ=', get_params['billingAddressSig'].first
+    assert_equal 'ZVwIQr0pQ7hC9a7gXPlpCCVXF2xEevH9Fd41TEFisi0=', get_params['shopperSig'].first
+  end
 
   def test_redirect_signature_check
-    params = { 
+    params = {
       :authResult => 'AUTHORISED', :pspReference => '1211992213193029',
       :merchantReference => 'Internet Order 12345', :skinCode => '4aD37dJA',
-      :merchantSig => 'ytt3QxWoEhAskUzUne0P5VA9lPw='
+      :merchantSig => 'uSSq3ROEOx625wtsR8tJNivgW1rs9BtH9FyzycrgmdE='
     }
 
     assert_equal params[:merchantSig], Adyen::Form.redirect_signature(params)
-    
+
     assert Adyen::Form.redirect_signature_check(params) # shared secret from registered skin
     assert Adyen::Form.redirect_signature_check(params, 'Kah942*$7sdp0)') # explicitly provided shared secret
-    
+
     refute Adyen::Form.redirect_signature_check(params.merge(skinCode: 'sk1nC0de'))
     refute Adyen::Form.redirect_signature_check(params, 'wrong_shared_secret')
 
@@ -193,9 +193,9 @@ class FormTest < Minitest::Test
     HTML
 
     for_each_xml_backend do
-      assert_adyen_single_payment_form payment_snippet, 
-        merchantAccount: 'TestMerchant', 
-        currencyCode: 'GBP', 
+      assert_adyen_single_payment_form payment_snippet,
+        merchantAccount: 'TestMerchant',
+        currencyCode: 'GBP',
         paymentAmount: '10000',
         skinCode: '4aD37dJA'
     end
@@ -209,9 +209,9 @@ class FormTest < Minitest::Test
     HTML
 
     for_each_xml_backend do
-      assert_adyen_recurring_payment_form recurring_snippet, 
-        merchantAccount: 'OtherMerchant', 
-        currencyCode: 'GBP', 
+      assert_adyen_recurring_payment_form recurring_snippet,
+        merchantAccount: 'OtherMerchant',
+        currencyCode: 'GBP',
         paymentAmount: '10000',
         recurringContract: 'DEFAULT',
         skinCode: 'sk1nC0de'
