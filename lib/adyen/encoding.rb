@@ -6,7 +6,7 @@ require 'zlib'
 module Adyen
   module Encoding
     def self.hmac_base64(hmac_key, message)
-      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), hmac_key, message)
+      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha1'), hmac_key, message)
       Base64.strict_encode64(digest).strip
     end
 
