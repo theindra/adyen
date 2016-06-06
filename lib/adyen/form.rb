@@ -127,6 +127,18 @@ module Adyen
       return parameters
     end
 
+    def hpp_payment_parameters(parameters = {})
+      raise ArgumentError, "Cannot generate form: parameters should be a hash!" unless parameters.is_a?(Hash)
+      do_parameter_transformations!(parameters)
+
+      raise ArgumentError, "Cannot generate form: :currency code attribute not found!"         unless parameters[:currency_code]
+      raise ArgumentError, "Cannot generate form: :payment_amount code attribute not found!"   unless parameters[:payment_amount]
+      raise ArgumentError, "Cannot generate form: :merchant_account attribute not found!"      unless parameters[:merchant_account]
+      raise ArgumentError, "Cannot generate form: :skin_code attribute not found!"             unless parameters[:skin_code]
+
+      return parameters
+    end
+
     # Transforms and flattens payment parameters to be in the correct format which is understood and accepted by adyen
     #
     # @param [Hash] parameters The payment parameters. The parameters set in the
@@ -134,6 +146,13 @@ module Adyen
     # @return [Hash] The payment parameters flatten, with camelized and prefixed key, stringified value
     def flat_payment_parameters(parameters = {})
       flatten(payment_parameters(parameters))
+    end
+
+    def flatten_and_sign_hpp_payment_parameters(parameters = {})
+      flattened_params = flatten(hpp_payment_parameters(parameters))
+      shared_secret ||= flattened_params.delete('sharedSecret')
+      raise ArgumentError, "Cannot calculate payment request signature without shared secret!" unless shared_secret
+      Adyen::HPP::Signature.sign(flattened_params, shared_secret)
     end
 
     # Returns an absolute URL to the Adyen payment system, with the payment parameters included
