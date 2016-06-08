@@ -345,6 +345,12 @@ module Adyen
       Adyen::Encoding.hmac_base64(shared_secret, redirect_signature_string(params))
     end
 
+    def redirect_sha256_signature(params, shared_secret = nil)
+      shared_secret ||= Adyen.configuration.form_skin_shared_secret_by_code(params[:skinCode])
+      raise ArgumentError, "Cannot compute redirect signature with empty shared_secret" if shared_secret.to_s.empty?
+      Adyen::Encoding.hmac_base64_sha256(shared_secret, redirect_signature_string(params))
+    end
+
     # Checks the redirect signature for this request by calcultating the signature from
     # the provided parameters, and comparing it to the signature provided in the +merchantSig+
     # parameter.
@@ -379,6 +385,12 @@ module Adyen
       raise ArgumentError, "params should be a Hash" unless params.is_a?(Hash)
       raise ArgumentError, "params should contain :merchantSig" unless params.key?(:merchantSig)
       params[:merchantSig] == redirect_signature(params, shared_secret)
+    end
+
+    def redirect_sha256_signature_check(params, shared_secret = nil)
+      raise ArgumentError, "params should be a Hash" unless params.is_a?(Hash)
+      raise ArgumentError, "params should contain :merchantSig" unless params.key?(:merchantSig)
+      params[:merchantSig] == redirect_sha256_signature(params, shared_secret)
     end
 
     # Returns the camelized version of a string.

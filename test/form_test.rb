@@ -187,6 +187,29 @@ class FormTest < Minitest::Test
     assert_raises(ArgumentError) { Adyen::Form.redirect_signature_check(params.delete(:skinCode)) }
   end
 
+  def test_redirect_sha256_signature_check
+    params = {
+      :authResult => 'AUTHORISED', :pspReference => '1211992213193029',
+      :merchantReference => 'Internet Order 12345', :skinCode => '4aD37dJA',
+      :merchantSig => 'uSSq3ROEOx625wtsR8tJNivgW1rs9BtH9FyzycrgmdE='
+    }
+
+    assert_equal params[:merchantSig], Adyen::Form.redirect_sha256_signature(params)
+
+    assert Adyen::Form.redirect_sha256_signature_check(params) # shared secret from registered skin
+    assert Adyen::Form.redirect_sha256_signature_check(params, 'Kah942*$7sdp0)') # explicitly provided shared secret
+
+    refute Adyen::Form.redirect_sha256_signature_check(params.merge(skinCode: 'sk1nC0de'))
+    refute Adyen::Form.redirect_sha256_signature_check(params, 'wrong_shared_secret')
+
+    refute Adyen::Form.redirect_sha256_signature_check(params.merge(pspReference: 'tampered'))
+    refute Adyen::Form.redirect_sha256_signature_check(params.merge(merchantSig: 'tampered'))
+
+    assert_raises(ArgumentError) { Adyen::Form.redirect_sha256_signature_check(nil) }
+    assert_raises(ArgumentError) { Adyen::Form.redirect_sha256_signature_check({}) }
+    assert_raises(ArgumentError) { Adyen::Form.redirect_sha256_signature_check(params.delete(:skinCode)) }
+  end
+
   def test_flatten
     parameters = { 'billingAddress.street' => 'My Street' }
     assert_equal parameters, Adyen::Form.flatten(:billing_address => { :street => 'My Street'})

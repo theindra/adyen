@@ -10,6 +10,11 @@ module Adyen
       Base64.strict_encode64(digest).strip
     end
 
+    def self.hmac_base64_sha256(hmac_key, message)
+      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), hmac_key, message)
+      Base64.strict_encode64(digest).strip
+    end
+
     def self.gzip_base64(message)
       sio = StringIO.new
       gz  = Zlib::GzipWriter.new(sio)
