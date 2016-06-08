@@ -190,8 +190,8 @@ class FormTest < Minitest::Test
   def test_redirect_sha256_signature_check
     params = {
       :authResult => 'AUTHORISED', :pspReference => '1211992213193029',
-      :merchantReference => 'Internet Order 12345', :skinCode => '4aD37dJA',
-      :merchantSig => 'uSSq3ROEOx625wtsR8tJNivgW1rs9BtH9FyzycrgmdE='
+      :merchantReference => '0459d7002da111e6a3740cc47a152e14-0001', :skinCode => '4aD37dJA',
+      :merchantSig => '7PtEO7b+JFiYJ5VOxIW+VykamRKFEyEEl4TQ/0m3/1I='
     }
 
     assert_equal params[:merchantSig], Adyen::Form.redirect_sha256_signature(params)
