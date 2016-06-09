@@ -11,8 +11,8 @@ module Adyen
     end
 
     def self.hmac_base64_sha256(hmac_key, message)
-      digest = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), hmac_key, message)
-      Base64.strict_encode64(digest).strip
+      sig = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), Array(hmac_key).pack("H*"), message)
+      Base64.strict_encode64(sig).strip
     end
 
     def self.gzip_base64(message)

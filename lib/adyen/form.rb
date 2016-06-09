@@ -114,6 +114,7 @@ module Adyen
       # Calculate the merchant signature using the shared secret.
       shared_secret ||= parameters.delete(:shared_secret)
       raise ArgumentError, "Cannot calculate payment request signature without shared secret!" unless shared_secret
+
       parameters[:merchant_sig] = calculate_signature(parameters, shared_secret)
 
       if parameters[:billing_address]
@@ -238,6 +239,38 @@ module Adyen
     # MERCHANT SIGNATURE CALCULATION
     ######################################################
 
+
+    def string_to_sign(params, type)
+      string = ''
+      if type == :hpp
+        string = sorted_keys(params) + sorted_values(params)
+      elsif type == :rest
+        keys = %w(pspReference originalReference merchantAccountCode merchantReference value currency eventCode success)
+        string = sorted_values(params, keys)
+      else
+        raise NotImplementedError, 'Type sign not implemented'
+      end
+
+      string.map{ |el| escape_value(el) }.join(':')
+    end
+
+    def sorted_keys(hash, keys_to_sort = nil)
+      hash.sort.map{ |el| el[0].to_s.camelize(:lower)  }
+    end
+
+    def sorted_values(hash, keys_to_sort = nil)
+      if keys_to_sort.is_a? Array
+        keys_to_sort.map { |key| hash[key] }
+      else
+        hash.sort.map{ |el| el[1] }
+      end
+    end
+
+    def escape_value(value)
+      value.to_s.gsub(':', '\\:').gsub('\\', '\\\\')
+    end
+
+
     # Generates the string that is used to calculate the request signature. This signature
     # is used by Adyen to check whether the request is genuinely originating from you.
     # @param [Hash] parameters The parameters that will be included in the payment request.
@@ -271,7 +304,7 @@ module Adyen
     def calculate_signature(parameters, shared_secret = nil)
       shared_secret ||= parameters.delete(:shared_secret)
       raise ArgumentError, "Cannot calculate payment request signature with empty shared_secret" if shared_secret.to_s.empty?
-      Adyen::Encoding.hmac_base64(shared_secret, calculate_signature_string(parameters))
+      Adyen::Encoding.hmac_base64_sha256(shared_secret, string_to_sign(parameters, :hpp))
     end
 
     # Generates the string that is used to calculate the request signature. This signature
